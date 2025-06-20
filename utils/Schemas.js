@@ -197,6 +197,53 @@ const updateUserSchema = Joi.object({
   isAdmin: Joi.boolean(),
 }).min(1); // Require at least one field to update
 
+
+
+const createPostSchema = Joi.object({
+  title: Joi.string().trim().min(2).required().messages({
+    "string.base": "Title must be a string",
+    "string.empty": "Title is required",
+    "string.min": "Title must be at least 2 characters",
+    "any.required": "Title is required",
+  }),
+  description: Joi.string().trim().min(4).required().messages({
+    "string.base": "Description must be a string",
+    "string.empty": "Description is required",
+    "string.min": "Description must be at least 4 characters",
+    "any.required": "Description is required",
+  }),
+});
+
+const updatePostSchema = Joi.object({
+  title: Joi.string().trim().min(2).messages({
+    "string.base": "Title must be a string",
+    "string.min": "Title must be at least 2 characters",
+  }),
+  description: Joi.string().trim().min(4).messages({
+    "string.base": "Description must be a string",
+    "string.min": "Description must be at least 4 characters",
+  }),
+}).min(1);
+
+const createCommentSchema = Joi.object({
+  text: Joi.string().trim().min(1).max(500).required().messages({
+    "string.base": "Comment must be a string",
+    "string.empty": "Comment is required",
+    "string.min": "Comment must be at least 1 character",
+    "string.max": "Comment cannot exceed 500 characters",
+    "any.required": "Comment is required",
+  }),
+});
+
+const updateCommentSchema = Joi.object({
+  text: Joi.string().trim().min(1).max(500).messages({
+    "string.base": "Comment must be a string",
+    "string.min": "Comment must be at least 1 character",
+    "string.max": "Comment cannot exceed 500 characters",
+  }),
+}).min(1);
+
+
 module.exports = {
   bookSchema,
   updateBookSchema,

@@ -6,6 +6,8 @@ const booksPath = require("./routes/books");
 const authorsPath = require("./routes/authors");
 const authPath = require("./routes/auth");
 const usersPath = require("./routes/users");
+const postsPath = require("./routes/posts");
+const commentsPath = require("./routes/comments");
 const { notFound, errorHandeler } = require("./middlewares/errors");
 const connectDB = require("./config/db");
 app.use(express.json()); // for parsing application/json
@@ -17,6 +19,8 @@ app.use("/api/books", booksPath);
 app.use("/api/authors", authorsPath);
 app.use("/api/auth", authPath);
 app.use("/api/users", usersPath);
+app.use("/api/posts", postsPath);
+app.use("/api/comments", commentsPath);
 
 // Error Handler
 // it must be in that order
