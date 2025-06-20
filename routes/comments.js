@@ -11,15 +11,31 @@ const { verifyToken, verifyTokenAndAuthorization } = require("../middlewares/ver
 
 const router = express.Router();
 
-// Get all comments for a post
+// Get paginated comments
+
 router.get(
-  "/post/:postId",
+  "/",
   asyncHandler(async (req, res) => {
-    const comments = await Comment.find({ post: req.params.postId }).populate(
-      "user",
-      "username"
-    );
-    res.status(200).json(comments);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const totalComments = await Comment.countDocuments();
+    const totalPages = Math.ceil(totalComments / limit);
+
+    const comments = await Comment.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("user", "username email")
+      .populate("post", "title"); // Optional: include post info if needed
+
+    res.status(200).json({
+      comments,
+      currentPage: page,
+      totalPages,
+      totalComments,
+    });
   })
 );
 

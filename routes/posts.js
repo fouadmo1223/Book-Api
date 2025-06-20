@@ -11,11 +11,22 @@ const {
 
 const router = express.Router();
 
-// Get all posts with comments
+// Get paginated posts with comments
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const posts = await Post.find().populate("user", "username email");
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const totalPosts = await Post.countDocuments();
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("user", "username email");
 
     const postsWithComments = await Promise.all(
       posts.map(async (post) => {
@@ -27,9 +38,15 @@ router.get(
       })
     );
 
-    res.status(200).json(postsWithComments);
+    res.status(200).json({
+      posts: postsWithComments,
+      currentPage: page,
+      totalPages,
+      totalPosts,
+    });
   })
 );
+
 
 // Get my posts with comments
 router.get(
