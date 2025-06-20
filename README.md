@@ -1,269 +1,149 @@
 # 📚 Book API
 
-A RESTful API built with **Node.js**, **Express**, and **MongoDB** that manages **Users**, **Books**, and **Authors**, with secure authentication, input validation, pagination, and role-based access control.
+# Node.js Demo API - Posts & Comments
 
----
+A full-featured RESTful API built with **Node.js**, **Express**, and **MongoDB** (Mongoose) for managing users, posts, comments, books, and authors.
 
-## 🚀 Tech Stack
+## 🚀 Technologies Used
+| Technology          | Used For                         |
+|---------------------|----------------------------------|
+| Node.js             | JavaScript runtime               |
+| Express.js          | Web framework for Node.js        |
+| MongoDB + Mongoose  | Database and ODM                 |
+| Joi                 | Request validation               |
+| JWT (jsonwebtoken)  | Authentication                   |
+| bcryptjs            | Password hashing                 |
+| express-async-handler | Simplified async error handling |
+| dotenv              | Environment variable management  |
 
-- **Node.js** – JavaScript runtime
-- **Express.js** – Web framework
-- **MongoDB** – NoSQL database
-- **Mongoose** – MongoDB ODM
-- **JWT (jsonwebtoken)** – Authentication via access tokens
-- **bcryptjs** – Password hashing
-- **Joi** – Data validation
-- **dotenv** – Environment variable management
-- **nodemon** – Dev server auto-reloading
-- **express-async-handler** – Clean async error handling
-
----
-
-## 📂 Project Structure
-
+## 📁 Project Structure
 ```
-.
-├── app.js
-├── config/
-│   └── connectDB.js
-├── controllers/
-├── middlewares/
-│   └── verifyToken.js
-├── models/
-│   ├── User.js
-│   ├── Book.js
-│   └── Author.js
-├── routes/
-│   ├── authRoutes.js
-│   ├── userRoutes.js
-│   ├── bookRoutes.js
-│   └── authorRoutes.js
-├── utils/
-│   └── Schemas.js
-├── .env
-└── package.json
+├── models/              # Mongoose models (User, Post, Comment, Book, Author)
+├── routes/              # Express routers
+├── utils/Schemas.js     # Joi validation schemas
+├── middlewares/         # Authentication and authorization
+├── app.js               # Main Express app
+└── .env                 # Environment variables
 ```
-
----
-
-## ⚙️ Setup
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/yourusername/book-api.git
-cd book-api
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Configure environment variables
-
-Create a `.env` file in the root:
-
-```env
-PORT=5000
-DB_URL=mongodb://localhost:27017/book-api
-JWT_SECRET=your_secret_key
-```
-
-### 4. Start the server
-
-```bash
-npm start
-```
-
----
 
 ## 🔐 Authentication
+Use JWT for protected routes.
+- Register: `POST /auth/register`
+- Login: `POST /auth/login`
 
-### Register
-
-```http
-POST /api/auth/register
+Include token in requests:
 ```
-
-```json
-{
-  "username": "john",
-  "email": "john@example.com",
-  "password": "123456"
-}
-```
-
-### Login
-
-```http
-POST /api/auth/login
-```
-
-```json
-{
-  "email": "john@example.com",
-  "password": "123456"
-}
-```
-
-🔁 Returns a JWT token:
-
-```json
-{
-  "id": "userId",
-  "username": "john",
-  "email": "john@example.com",
-  "isAdmin": false,
-  "token": "your_jwt_token"
-}
-```
-
----
-
-## 📘 Book Routes
-
-### Get All Books (paginated)
-
-```http
-GET /api/books?page=1
-```
-
-### Get Book by ID
-
-```http
-GET /api/books/:id
-```
-
-### Create Book *(Authenticated)*
-
-```http
-POST /api/books
 Authorization: Bearer <token>
 ```
 
+## 📚 API Endpoints & Examples
+
+### 🧑 Users
+- `GET /users` — Admin only
+- `GET /users/:id` — Admin or user himself
+- `PUT /users/:id` — Admin or user himself
+- `DELETE /users/:id` — Admin or user himself
+- `PUT /users/block/:id` — Admin only
+
+### ✍️ Posts
+- `GET /posts` — Get all posts with comments
+- `GET /posts/:id` — Get a single post with comments
+- `GET /posts/me` — Get my posts with comments
+- `POST /posts` — Create post
+```http
+POST /posts
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "My First Post",
+  "description": "This is my post."
+}
+```
+- `PUT /posts/:id` — Update post (owner or admin)
+```http
+PUT /posts/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Updated Post",
+  "description": "Updated content."
+}
+```
+- `DELETE /posts/:id` — Delete post
+```http
+DELETE /posts/:id
+Authorization: Bearer <token>
+```
+
+### 💬 Comments
+- `GET /comments` — Get all comments
+- `GET /comments/:id` — Get a single comment
+- `GET /comments/me` — Get my comments
+- `POST /comments` — Add comment
+```http
+POST /comments
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "post": "<post_id>",
+  "comment": "Great post!"
+}
+```
+- `PUT /comments/:id` — Update comment (owner or admin)
+```http
+PUT /comments/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "comment": "Updated comment."
+}
+```
+- `DELETE /comments/:id` — Delete comment (owner or admin)
+```http
+DELETE /comments/:id
+Authorization: Bearer <token>
+```
+
+## 🔍 Example: Get Single Post with Comments
+```http
+GET /posts/664c8a59d2430cabc95c9f25
+```
 ```json
 {
-  "title": "The Hobbit",
-  "author": "authorId",
-  "price": 25,
-  "description": "Fantasy adventure",
-  "cover": "https://image.url"
+  "_id": "...",
+  "title": "My First Post",
+  "description": "This is the body of the post.",
+  "user": {
+    "_id": "...",
+    "username": "johnDoe"
+  },
+  "comments": [
+    {
+      "_id": "...",
+      "comment": "Nice post!",
+      "user": { "_id": "...", "username": "jane" }
+    }
+  ]
 }
 ```
 
-### Update Book *(Admin Only)*
-
-```http
-PUT /api/books/:id
-Authorization: Bearer <admin-token>
+## ✅ Running the Project
+```bash
+npm install
+npm run start
 ```
 
-### Delete Book *(Admin Only)*
-
-```http
-DELETE /api/books/:id
-Authorization: Bearer <admin-token>
+### .env file example
 ```
-
----
-
-## ✍️ Author Routes
-
-### Get All Authors
-
-```http
-GET /api/authors?page=1
-```
-
-### Get Author by ID
-
-```http
-GET /api/authors/:id
-```
-
-### Create Author *(Authenticated)*
-
-```http
-POST /api/authors
-Authorization: Bearer <token>
-```
-
-```json
-{
-  "firstName": "J.R.R.",
-  "lastName": "Tolkien",
-  "nationality": "British",
-  "image": "https://image.url"
-}
+MONGO_URI=mongodb://localhost:27017/demoDB
+JWT_SECRET=yourSecretKey
 ```
 
 ---
+Made with 💻 using Node.js + Express
 
-## 👤 User Routes
-
-### Get All Users *(Admin Only)*
-
-```http
-GET /api/users
-Authorization: Bearer <admin-token>
-```
-
-### Get Single User *(Owner or Admin)*
-
-```http
-GET /api/users/:id
-Authorization: Bearer <token>
-```
-
-### Update User *(Owner or Admin)*
-
-```http
-PUT /api/users/:id
-Authorization: Bearer <token>
-```
-
-```json
-{
-  "username": "newname",
-  "email": "new@example.com",
-  "password": "newpassword"
-}
-```
-
-### Delete User *(Owner or Admin)*
-
-```http
-DELETE /api/users/:id
-Authorization: Bearer <token>
-```
-
-### Block/Unblock User *(Admin Only)*
-
-```http
-PUT /api/users/block/:id
-Authorization: Bearer <admin-token>
-```
-
----
-
-## 📦 Example `.env`
-
-```env
-PORT=5000
-DB_URL=mongodb://localhost:27017/book-api
-JWT_SECRET=supersecretkey123
-```
-
----
-
-## ✅ Future Improvements
-
-- Swagger or Postman Docs
-- Email verification
-- Role-based permissions
-- Unit & integration tests
-
----
 
