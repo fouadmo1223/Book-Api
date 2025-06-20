@@ -22,12 +22,12 @@ A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoD
 ## 📁 Project Structure
 
 ```
-🔹 models/              # Mongoose models (User, Post, Comment, Book, Author)
-🔹 routes/              # Express route handlers
-🔹 middlewares/         # Authentication & authorization logic
-🔹 utils/               # Joi validation schemas
-🔹 app.js               # App entry point
-🔹 .env                 # Environment config
+├── models/              # Mongoose models (User, Post, Comment, Book, Author)
+├── routes/              # Express route handlers
+├── middlewares/         # Authentication & authorization logic
+├── utils/               # Joi validation schemas
+├── app.js               # App entry point
+└── .env                 # Environment config
 ```
 
 ---
@@ -139,16 +139,50 @@ Content-Type: application/json
 
 ---
 
-## 📚 Books & Authors (Optional)
+## 📚 Books & Authors
 
-> Include these if implemented
+| Method | Endpoint       | Description                       |
+| ------ | -------------- | --------------------------------- |
+| GET    | `/api/books`   | Get all books with author details |
+| POST   | `/api/books`   | Create a new book                 |
+| GET    | `/api/authors` | Get all authors                   |
+| POST   | `/api/authors` | Add a new author                  |
 
-| Method | Endpoint       | Description       |
-| ------ | -------------- | ----------------- |
-| GET    | `/api/books`   | Get all books     |
-| POST   | `/api/books`   | Create a new book |
-| GET    | `/api/authors` | Get all authors   |
-| POST   | `/api/authors` | Add a new author  |
+### 🔍 Filtered & Paginated Books
+
+```http
+GET /api/books?page=1&price=20&comparison=eq
+GET /api/books?page=2&comparison=between&price=10&maxPrice=30
+```
+
+**Optional Query Parameters:**
+
+* `page`: Page number (default: 1)
+* `price`: Price value to compare
+* `comparison`: Can be `eq`, `neq`, `gt`, `lt`, or `between`
+* `maxPrice`: Required only if `comparison=between`
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "_id": "...",
+      "title": "Book Title",
+      "price": 25,
+      "author": {
+        "_id": "...",
+        "firstName": "John",
+        "lastName": "Doe"
+      }
+    }
+  ],
+  "currentPage": 1,
+  "totalPages": 5,
+  "total": 50
+}
+```
 
 ---
 
