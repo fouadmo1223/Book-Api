@@ -103,4 +103,86 @@ router.post(
   })
 );
 
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
+
+// Forgot Password
+router.post(
+  "/forgot-password",
+  asyncHandler(async (req, res) => {
+    const { email, redirectUrl } = req.body;
+
+    if (!email || !redirectUrl) {
+      return res
+        .status(400)
+        .json({ message: "Email and redirectUrl are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "No user found with that email" });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.resetPasswordToken = tokenHash;
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
+    await user.save();
+
+    const resetLink = `${redirectUrl}?token=${resetToken}`;
+
+    const html = `
+      <p>Hello ${user.username},</p>
+      <p>You requested a password reset.</p>
+      <p>Click below to reset your password:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>This link will expire in 15 minutes.</p>
+    `;
+
+    await sendEmail(user.email, "Password Reset", html);
+
+    res.status(200).json({ message: "Password reset email sent" });
+  })
+);
+
+// Reset Password
+router.post(
+  "/reset-password",
+  asyncHandler(async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Token and new password are required" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: tokenHash,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully" });
+  })
+);
+
+
+
 module.exports = router;
