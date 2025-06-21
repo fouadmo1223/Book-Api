@@ -1,6 +1,6 @@
 # 📚 Book API
 
-A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoDB** for managing users, posts, comments, books, and authors. This project demonstrates user authentication, CRUD operations, and data relationships.
+A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoDB** for managing users, posts, comments, books, authors, and profile images. This project demonstrates user authentication, CRUD operations, data relationships, and Cloudinary-based image uploads.
 
 ---
 
@@ -17,6 +17,8 @@ A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoD
 | **dotenv**                | Environment variable management  |
 | **express-async-handler** | Simplified async error handling  |
 | **nodemailer**            | Sending reset password emails    |
+| **Cloudinary**            | Uploading profile images         |
+| **multer**                | Handling multipart file uploads  |
 
 ---
 
@@ -26,7 +28,7 @@ A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoD
 ├── models/              # Mongoose models (User, Post, Comment, Book, Author)
 ├── routes/              # Express route handlers
 ├── middlewares/         # Authentication & authorization logic
-├── utils/               # Joi validation schemas + mailer
+├── utils/               # Joi validation schemas + mailer + Cloudinary
 ├── app.js               # App entry point
 └── .env                 # Environment config
 ```
@@ -108,6 +110,50 @@ POST /api/auth/reset-password
   "token": "abc123resetToken",
   "newPassword": "NewSecurePassword@123"
 }
+```
+
+---
+
+## 📤 Profile Image Upload (Cloudinary)
+
+Authenticated users can upload a profile image. The image is stored on **Cloudinary**, and any previously uploaded image is automatically deleted.
+
+### 🔐 Endpoint
+
+```http
+POST /api/users/:id/profile
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+```
+
+**Form Data:**
+
+| Key   | Type | Required | Description               |
+| ----- | ---- | -------- | ------------------------- |
+| image | File | Yes      | JPEG or PNG profile image |
+
+> 🔒 Only the user themselves or an admin can upload an image.
+
+### ✅ Response Example
+
+```json
+{
+  "message": "Profile image uploaded to Cloudinary",
+  "user": {
+    "id": "665c94f99ab1c9e02a5e878d",
+    "username": "johndoe",
+    "email": "john@example.com",
+    "profileImage": "https://res.cloudinary.com/your_cloud_name/image/upload/v.../profile.jpg"
+  }
+}
+```
+
+### 🛠 .env Requirements for Cloudinary
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ---
@@ -269,13 +315,16 @@ MONGO_URI=mongodb://localhost:27017/demoDB
 JWT_SECRET=yourSecretKey
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_email_password_or_app_password
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ---
 
 ## 🧠 Author
 
-Made with 💻 by \[Fouad MOhamed Abdelkader  ]
+Made with 💻 by \[Fouad Mohamed Abdelkader]
 
 Feel free to contribute or fork the project!
 
