@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema(
       required: [true, "Email is required"],
       trim: true,
       unique: true,
+
       minlength: [3, "Email must be at least 3 characters"],
       maxlength: [100, "Email cannot exceed 100 characters"],
       validate: {
@@ -51,6 +52,17 @@ const UserSchema = new mongoose.Schema(
     },
     resetPasswordExpires: {
       type: Date,
+    },
+    profileImage: {
+      url: {
+        type: String,
+        default:
+          "https://res.cloudinary.com/demo/image/upload/v1711111111/default-profile.png", // Replace with your actual default image URL
+      },
+      publicId: {
+        type: String,
+        default: null,
+      },
     },
   },
   {

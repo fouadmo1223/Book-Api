@@ -1,5 +1,5 @@
 const express = require("express");
-const { updateUserSchema, createUserSchema } = require("../utils/Schemas");
+const { updateUserSchema, createUserSchema, resetPasswordSchema } = require("../utils/Schemas");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
@@ -149,19 +149,25 @@ router.post(
   })
 );
 
-// Reset Password
 router.post(
   "/reset-password",
   asyncHandler(async (req, res) => {
-    const { token, newPassword } = req.body;
+    const { error, value } = resetPasswordSchema.validate(req.body, {
+      abortEarly: false,
+    });
 
-    if (!token || !newPassword) {
-      return res
-        .status(400)
-        .json({ message: "Token and new password are required" });
+    if (error) {
+      const errors = {};
+      error.details.forEach((err) => {
+        errors[err.context.key] = err.message;
+      });
+      return res.status(400).json({ errors });
     }
 
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(value.token)
+      .digest("hex");
 
     const user = await User.findOne({
       resetPasswordToken: tokenHash,
@@ -173,7 +179,7 @@ router.post(
     }
 
     const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.password = await bcrypt.hash(value.newPassword, salt);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
@@ -182,7 +188,6 @@ router.post(
     res.status(200).json({ message: "Password reset successfully" });
   })
 );
-
 
 
 module.exports = router;

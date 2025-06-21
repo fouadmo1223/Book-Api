@@ -162,6 +162,28 @@ const createUserSchema = Joi.object({
 });
 
 
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    "string.base": "Reset token must be a string",
+    "string.empty": "Reset token is required",
+    "any.required": "Reset token is required",
+  }),
+
+  newPassword: Joi.string()
+    .trim()
+    .min(6)
+    .pattern(/[0-9]/)
+    .pattern(/[!@#$%^&*(),.?":{}|<>]/)
+    .required()
+    .messages({
+      "string.base": "Password must be a string",
+      "string.empty": "Password is required",
+      "any.required": "Password is required",
+      "string.min": "Password must be at least 6 characters",
+      "string.pattern.base":
+        "Password must include at least one number and one special character",
+    }),
+});
 
 const updateUserSchema = Joi.object({
   username: Joi.string().trim().min(2).max(200).messages({
@@ -251,4 +273,5 @@ module.exports = {
   updateAuthorSchema,
   createUserSchema,
   updateUserSchema,
+  resetPasswordSchema,
 };
