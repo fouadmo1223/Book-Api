@@ -16,6 +16,7 @@ A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoD
 | **bcryptjs**              | Password hashing                 |
 | **dotenv**                | Environment variable management  |
 | **express-async-handler** | Simplified async error handling  |
+| **nodemailer**            | Sending reset password emails    |
 
 ---
 
@@ -25,7 +26,7 @@ A full-featured RESTful API built with **Node.js**, **Express.js**, and **MongoD
 ├── models/              # Mongoose models (User, Post, Comment, Book, Author)
 ├── routes/              # Express route handlers
 ├── middlewares/         # Authentication & authorization logic
-├── utils/               # Joi validation schemas
+├── utils/               # Joi validation schemas + mailer
 ├── app.js               # App entry point
 └── .env                 # Environment config
 ```
@@ -71,6 +72,42 @@ POST /api/auth/login
 
 ```
 Authorization: Bearer <token>
+```
+
+---
+
+## 🔄 Password Reset
+
+### 📩 Request Password Reset Email
+
+```http
+POST /api/auth/forgot-password
+```
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "redirectUrl": "https://yourapp.com/reset-password"
+}
+```
+
+> The API sends a secure token to the user's email with the full reset URL.
+
+### 🔁 Reset Password
+
+```http
+POST /api/auth/reset-password
+```
+
+**Request Body:**
+
+```json
+{
+  "token": "abc123resetToken",
+  "newPassword": "NewSecurePassword@123"
+}
 ```
 
 ---
@@ -230,10 +267,15 @@ npm run start
 ```env
 MONGO_URI=mongodb://localhost:27017/demoDB
 JWT_SECRET=yourSecretKey
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_password_or_app_password
 ```
 
 ---
 
+## 🧠 Author
+
+Made with 💻 by \[Fouad MOhamed Abdelkader  ]
 
 Feel free to contribute or fork the project!
 
